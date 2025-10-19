@@ -157,7 +157,8 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
           description: formData.description,
           price: formData.price,
           stock: formData.stock,
-          categoryId: formData.categoryId || null,
+          categoryId:
+            formData.categoryId === "none" ? null : formData.categoryId || null,
           barcode: formData.barcode,
           image: formData.image,
         }),
@@ -277,16 +278,19 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
             <div>
               <label className="block text-sm font-medium mb-1">Category</label>
               <Select
-                value={formData.categoryId}
+                value={formData.categoryId || "none"}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, categoryId: value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    categoryId: value === "none" ? "" : value,
+                  }))
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="none">No category</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
