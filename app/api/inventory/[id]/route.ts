@@ -1,0 +1,92 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "../../../../lib/auth";
+import { db } from "../../../../lib/db";
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { name, description, price, stock, categoryId, barcode, image } =
+      await request.json();
+
+    if (!name || !price || stock === undefined) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const product = await db.product.update({
+      where: { id: params.id },
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        categoryId: categoryId || null,
+        barcode,
+        image,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    return NextResponse.json({ success: true, product });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if product is used in any sales
+    const productInSales = await db.saleItem.findFirst({
+      where: { productId: params.id },
+    });
+
+    if (productInSales) {
+      return NextResponse.json(
+        {
+          error: "Cannot delete product",
+          message:
+            "This product is associated with existing sales and cannot be deleted. Consider deactivating it instead.",
+        },
+        { status: 400 }
+      );
+    }
+
+    await db.product.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
