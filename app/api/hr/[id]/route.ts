@@ -51,11 +51,22 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Only admins can delete employees" },
+        { status: 403 }
+      );
+    }
+
     await db.employee.delete({
       where: { id: params.id },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Employee deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting employee:", error);
     return NextResponse.json(

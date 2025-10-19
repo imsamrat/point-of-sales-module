@@ -58,6 +58,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Only admins can delete products" },
+        { status: 403 }
+      );
+    }
+
     // Check if product is used in any sales
     const productInSales = await db.saleItem.findFirst({
       where: { productId: params.id },

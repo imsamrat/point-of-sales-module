@@ -13,6 +13,7 @@ import { ProductForm } from "../../components/ProductForm";
 import { Edit, Trash2, Plus, Package } from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
+import { useSession } from "next-auth/react";
 import { Header } from "../../components/layout/Header";
 import { Sidebar } from "../../components/layout/Sidebar";
 
@@ -37,6 +38,7 @@ export default function InventoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     productId: string | null;
@@ -380,15 +382,17 @@ export default function InventoryPage() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        onClick={() =>
-                          handleDeleteProduct(product.id, product.name)
-                        }
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {session?.user?.role === "admin" && (
+                        <Button
+                          onClick={() =>
+                            handleDeleteProduct(product.id, product.name)
+                          }
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}

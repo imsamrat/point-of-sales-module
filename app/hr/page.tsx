@@ -11,8 +11,9 @@ import {
 } from "../../components/ui/Card";
 import { EmployeeForm } from "../../components/EmployeeForm";
 import { Edit, Trash2, Plus } from "lucide-react";
-import { Header } from "../../components/layout/Header";
-import { Sidebar } from "../../components/layout/Sidebar";
+import { useToast } from "../../components/ui/use-toast";
+import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
+import { useSession } from "next-auth/react";
 
 interface Employee {
   id: string;
@@ -33,6 +34,19 @@ export default function HRPage() {
     Employee | undefined
   >();
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { data: session } = useSession();
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    employeeId: string | null;
+    employeeName: string;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    employeeId: null,
+    employeeName: "",
+    isDeleting: false,
+  });
 
   useEffect(() => {
     fetchEmployees();
@@ -62,24 +76,67 @@ export default function HRPage() {
     setShowForm(true);
   };
 
-  const handleDeleteEmployee = async (employeeId: string) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
+  const handleDeleteEmployee = (employeeId: string, employeeName: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      employeeId,
+      employeeName,
+      isDeleting: false,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.employeeId) return;
+
+    setDeleteDialog((prev) => ({ ...prev, isDeleting: true }));
 
     try {
-      const response = await fetch(`/api/hr/${employeeId}`, {
+      const response = await fetch(`/api/hr/${deleteDialog.employeeId}`, {
         method: "DELETE",
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         fetchEmployees();
+        toast({
+          title: "Success",
+          description: data.message || "Employee deleted successfully",
+          variant: "success",
+        });
+        setDeleteDialog({
+          isOpen: false,
+          employeeId: null,
+          employeeName: "",
+          isDeleting: false,
+        });
       } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast({
+          title: "Error",
+          description:
+            data.message || data.error || "Failed to delete employee",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
-      alert("Error deleting employee");
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while deleting the employee",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialog((prev) => ({ ...prev, isDeleting: false }));
     }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialog({
+      isOpen: false,
+      employeeId: null,
+      employeeName: "",
+      isDeleting: false,
+    });
   };
 
   const handleFormSuccess = () => {
@@ -166,13 +223,17 @@ export default function HRPage() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        onClick={() => handleDeleteEmployee(employee.id)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {session?.user?.role === "admin" && (
+                        <Button
+                          onClick={() =>
+                            handleDeleteEmployee(employee.id, employee.name)
+                          }
+                          size="sm"
+                          variant="destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -189,6 +250,15 @@ export default function HRPage() {
           onSuccess={handleFormSuccess}
         />
       )}
+
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${deleteDialog.employeeName}`}
+        description={`Are you sure you want to delete "${deleteDialog.employeeName}"? This action cannot be undone.`}
+        isLoading={deleteDialog.isDeleting}
+      />
     </div>
   );
 }

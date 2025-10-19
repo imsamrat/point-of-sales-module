@@ -15,6 +15,8 @@ import {
   Moon,
   Monitor,
   Tag,
+  FileText,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -32,6 +34,12 @@ const navigation = [
     roles: ["admin", "user"],
   },
   {
+    name: "Sales Management",
+    href: "/sales-management",
+    icon: FileText,
+    roles: ["admin"],
+  },
+  {
     name: "Inventory",
     href: "/inventory",
     icon: Package,
@@ -43,8 +51,14 @@ const navigation = [
     icon: Tag,
     roles: ["admin", "user"],
   },
+  {
+    name: "User Management",
+    href: "/users",
+    icon: Users,
+    roles: ["admin"],
+  },
   { name: "Expenses", href: "/expenses", icon: DollarSign, roles: ["admin"] },
-  { name: "HR", href: "/hr", icon: Users, roles: ["admin"] },
+  { name: "HR", href: "/hr", icon: UserCheck, roles: ["admin"] },
 ];
 
 export function Sidebar() {

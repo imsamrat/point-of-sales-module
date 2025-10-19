@@ -69,11 +69,11 @@ export function SaleForm() {
     const existingItem = cart.find((item) => item.productId === product.id);
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {
-        showAlert(
-          "warning",
-          "Insufficient Stock",
-          "Not enough stock available for this product"
-        );
+        toast({
+          variant: "warning",
+          title: "Insufficient Stock",
+          description: "Not enough stock available for this product",
+        });
         return;
       }
       setCart(
@@ -112,7 +112,7 @@ export function SaleForm() {
     }
 
     const product = products.find((p) => p.id === productId);
-    if (existingItem.quantity >= product.stock) {
+    if (product && quantity > product.stock) {
       toast({
         variant: "warning",
         title: "Insufficient Stock",
