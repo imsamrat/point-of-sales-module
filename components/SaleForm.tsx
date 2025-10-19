@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import {
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/Card";
+import { ThermalReceipt } from "./ThermalReceipt";
 import { useToast } from "./ui/use-toast";
 import { Plus, Minus, ShoppingCart, X } from "lucide-react";
 
@@ -47,7 +49,10 @@ export function SaleForm() {
     phone: "",
     address: "",
   });
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   useEffect(() => {
     fetchProducts();
@@ -187,6 +192,31 @@ export function SaleForm() {
       });
 
       if (response.ok) {
+        const saleResult = await response.json();
+
+        // Prepare receipt data
+        const receiptInfo = {
+          customer: customer.phone.trim()
+            ? {
+                name: customer.name.trim() || undefined,
+                phone: customer.phone.trim(),
+              }
+            : undefined,
+          items: cart.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total,
+          })),
+          total: getTotal(),
+          saleId: saleResult.sale?.id,
+          date: new Date().toLocaleString(),
+          cashier: session?.user?.name || "Unknown",
+        };
+
+        setReceiptData(receiptInfo);
+        setShowReceipt(true);
+
         toast({
           variant: "success",
           title: "Sale Completed",
@@ -358,7 +388,7 @@ export function SaleForm() {
                         className="w-full mt-4"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Processing..." : "Complete Sale"}
+                        {isLoading ? "Processing..." : "Process"}
                       </Button>
                     </div>
                   </div>
@@ -443,6 +473,14 @@ export function SaleForm() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Receipt Modal */}
+      {showReceipt && receiptData && (
+        <ThermalReceipt
+          data={receiptData}
+          onClose={() => setShowReceipt(false)}
+        />
       )}
     </div>
   );
