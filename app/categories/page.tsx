@@ -12,8 +12,8 @@ import {
 import { Edit, Trash2, Plus, Package } from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
-import { Header } from "../../components/layout/Header";
-import { Sidebar } from "../../components/layout/Sidebar";
+import { useSession } from "next-auth/react";
+import { ResponsiveLayout } from "../../components/layout/ResponsiveLayout";
 
 interface Category {
   id: string;
@@ -34,6 +34,7 @@ export default function CategoriesPage() {
   >();
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     categoryId: string | null;
@@ -151,81 +152,79 @@ export default function CategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">Loading...</div>
+      <ResponsiveLayout>
+        <div className="flex justify-center items-center h-64">Loading...</div>
+      </ResponsiveLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold">Category Management</h1>
-              <Button onClick={handleAddCategory}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Category
-              </Button>
-            </div>
+    <ResponsiveLayout>
+      <div className="container mx-auto p-4 sm:p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Category Management</h1>
+          {session?.user?.role === "admin" && (
+            <Button onClick={handleAddCategory}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
+          )}
+        </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Categories</CardTitle>
-                <CardDescription>
-                  Manage your product categories
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {categories.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No categories found</p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      Create your first category to organize your products
-                    </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Description
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Products
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {categories.map((category) => (
-                          <tr key={category.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                              {category.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                              {category.description || "No description"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                              {category._count?.products || 0} products
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                              {new Date(
-                                category.createdAt
-                              ).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+        <Card>
+          <CardHeader>
+            <CardTitle>Categories</CardTitle>
+            <CardDescription>Manage your product categories</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {categories.length === 0 ? (
+              <div className="text-center py-8">
+                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No categories found</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Create your first category to organize your products
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Products
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {categories.map((category) => (
+                      <tr key={category.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                          {category.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {category.description || "No description"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {category._count?.products || 0} products
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {new Date(category.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {session?.user?.role === "admin" && (
+                            <>
                               <Button
                                 onClick={() => handleEditCategory(category)}
                                 size="sm"
@@ -246,36 +245,36 @@ export default function CategoriesPage() {
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {showForm && (
-              <CategoryForm
-                category={editingCategory}
-                onClose={handleFormClose}
-                onSuccess={handleFormSuccess}
-              />
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
+          </CardContent>
+        </Card>
 
-            <DeleteConfirmationDialog
-              isOpen={deleteDialog.isOpen}
-              onClose={handleCloseDeleteDialog}
-              onConfirm={handleConfirmDelete}
-              title={`Delete ${deleteDialog.categoryName}`}
-              description={`Are you sure you want to delete "${deleteDialog.categoryName}"? This action cannot be undone and may affect product organization.`}
-              isLoading={deleteDialog.isDeleting}
-            />
-          </div>
-        </main>
+        {showForm && (
+          <CategoryForm
+            category={editingCategory}
+            onClose={handleFormClose}
+            onSuccess={handleFormSuccess}
+          />
+        )}
+
+        <DeleteConfirmationDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={handleConfirmDelete}
+          title={`Delete ${deleteDialog.categoryName}`}
+          description={`Are you sure you want to delete "${deleteDialog.categoryName}"? This action cannot be undone and may affect product organization.`}
+          isLoading={deleteDialog.isDeleting}
+        />
       </div>
-    </div>
+    </ResponsiveLayout>
   );
 }
 

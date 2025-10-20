@@ -13,6 +13,7 @@ import { Trash2, Eye, DollarSign } from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
 import { useSession } from "next-auth/react";
+import { ThermalReceipt } from "../../components/ThermalReceipt";
 
 interface Sale {
   id: string;
@@ -42,6 +43,7 @@ export default function SalesManagementPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [showThermalReceipt, setShowThermalReceipt] = useState(false);
   const { toast } = useToast();
   const { data: session } = useSession();
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -144,6 +146,14 @@ export default function SalesManagementPage() {
     setSelectedSale(null);
   };
 
+  const handlePrintReceipt = () => {
+    setShowThermalReceipt(true);
+  };
+
+  const handleCloseThermalReceipt = () => {
+    setShowThermalReceipt(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">Loading...</div>
@@ -210,7 +220,7 @@ export default function SalesManagementPage() {
                       {sale.user.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      ${sale.total}
+                      ৳{sale.total.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {new Date(sale.createdAt).toLocaleDateString()}
@@ -249,13 +259,23 @@ export default function SalesManagementPage() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Sale Details</h2>
-                <Button
-                  onClick={handleCloseSaleDetails}
-                  variant="outline"
-                  size="sm"
-                >
-                  Close
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handlePrintReceipt}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Print Receipt
+                  </Button>
+                  <Button
+                    onClick={handleCloseSaleDetails}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -307,9 +327,9 @@ export default function SalesManagementPage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">${item.price}</p>
+                          <p className="font-medium">৳{item.price}</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ৳{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -320,7 +340,7 @@ export default function SalesManagementPage() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span>Total:</span>
-                    <span>${selectedSale.total}</span>
+                    <span>৳{selectedSale.total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -333,10 +353,35 @@ export default function SalesManagementPage() {
         isOpen={deleteDialog.isOpen}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
-        title={`Delete Sale - $${deleteDialog.saleTotal}`}
+        title={`Delete Sale - ৳${deleteDialog.saleTotal}`}
         description={`Are you sure you want to delete this sale? This action cannot be undone and will affect inventory records.`}
         isLoading={deleteDialog.isDeleting}
       />
+
+      {/* Thermal Receipt Modal */}
+      {showThermalReceipt && selectedSale && (
+        <ThermalReceipt
+          data={{
+            customer: selectedSale.customer
+              ? {
+                  name: selectedSale.customer.name || undefined,
+                  phone: selectedSale.customer.phone || "",
+                }
+              : undefined,
+            items: selectedSale.items.map((item) => ({
+              name: item.product.name,
+              quantity: item.quantity,
+              price: item.price,
+              total: item.price * item.quantity,
+            })),
+            total: selectedSale.total,
+            saleId: selectedSale.id,
+            date: new Date(selectedSale.createdAt).toLocaleString(),
+            cashier: selectedSale.user.name,
+          }}
+          onClose={handleCloseThermalReceipt}
+        />
+      )}
     </div>
   );
 }

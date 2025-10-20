@@ -11,8 +11,6 @@ import {
 } from "../../components/ui/Card";
 import { ExpenseForm } from "../../components/ExpenseForm";
 import { Edit, Trash2, Plus } from "lucide-react";
-import { Header } from "../../components/layout/Header";
-import { Sidebar } from "../../components/layout/Sidebar";
 
 interface Expense {
   id: string;
@@ -97,7 +95,7 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Expense Tracking
@@ -145,7 +143,7 @@ export default function ExpensesPage() {
                       {expense.description || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      ${expense.amount}
+                      ৳{expense.amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {expense.category}

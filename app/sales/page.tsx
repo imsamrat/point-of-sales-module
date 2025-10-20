@@ -41,12 +41,12 @@ export default async function SalesDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card
           title="Today's Sales"
-          value={`$${todaySales._sum.total || 0}`}
+          value={`৳${todaySales._sum.total?.toFixed(2) || 0}`}
           icon={DollarSign}
         />
         <Card
           title="Total Sales"
-          value={`$${totalSales._sum.total || 0}`}
+          value={`৳${totalSales._sum.total?.toFixed(2) || 0}`}
           icon={ShoppingCart}
         />
         <Card
@@ -110,7 +110,7 @@ export default async function SalesDashboard() {
                     {sale.user.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    ${sale.total}
+                    ৳{sale.total.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {sale.createdAt.toLocaleDateString()}

@@ -24,7 +24,9 @@ interface Product {
   id?: string;
   name: string;
   description?: string;
-  price: number;
+  purchasePrice: number;
+  sellingPrice: number;
+  initialStock: number;
   stock: number;
   categoryId?: string;
   category?: { id: string; name: string };
@@ -42,7 +44,9 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
   const [formData, setFormData] = useState<Product>({
     name: product?.name || "",
     description: product?.description || "",
-    price: product?.price || 0,
+    purchasePrice: product?.purchasePrice || 0,
+    sellingPrice: product?.sellingPrice || 0,
+    initialStock: product?.initialStock || 0,
     stock: product?.stock || 0,
     categoryId: product?.categoryId || product?.category?.id || "",
     barcode: product?.barcode || "",
@@ -155,7 +159,9 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
-          price: formData.price,
+          purchasePrice: formData.purchasePrice,
+          sellingPrice: formData.sellingPrice,
+          initialStock: formData.initialStock,
           stock: formData.stock,
           categoryId:
             formData.categoryId === "none" ? null : formData.categoryId || null,
@@ -203,7 +209,12 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "price" || name === "stock" ? parseFloat(value) || 0 : value,
+        name === "purchasePrice" ||
+        name === "sellingPrice" ||
+        name === "initialStock" ||
+        name === "stock"
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -249,13 +260,13 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Price *
+                  Purchase Price *
                 </label>
                 <Input
-                  name="price"
+                  name="purchasePrice"
                   type="number"
                   step="0.01"
-                  value={formData.price}
+                  value={formData.purchasePrice}
                   onChange={handleChange}
                   required
                 />
@@ -263,16 +274,45 @@ export function ProductForm({ product, onClose, onSuccess }: ProductFormProps) {
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Stock *
+                  Selling Price *
                 </label>
                 <Input
-                  name="stock"
+                  name="sellingPrice"
                   type="number"
-                  value={formData.stock}
+                  step="0.01"
+                  value={formData.sellingPrice}
                   onChange={handleChange}
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Initial Stock Qty *
+              </label>
+              <Input
+                name="initialStock"
+                type="number"
+                min="0"
+                value={formData.initialStock}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Current Stock Qty *
+              </label>
+              <Input
+                name="stock"
+                type="number"
+                min="0"
+                value={formData.stock}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div>

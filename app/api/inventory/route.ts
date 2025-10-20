@@ -9,28 +9,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, price, stock, categoryId, barcode, image } =
-      await request.json();
-
-    if (!name || !price || stock === undefined) {
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+        { error: "Forbidden", message: "Only admins can create products" },
+        { status: 403 }
       );
     }
 
-    // Check for duplicate product by name
-    const existingProductByName = await db.product.findFirst({
-      where: { name: name.trim() },
-    });
+    const {
+      name,
+      description,
+      purchasePrice,
+      sellingPrice,
+      initialStock,
+      stock,
+      categoryId,
+      barcode,
+      image,
+    } = await request.json();
 
-    if (existingProductByName) {
+    if (
+      !name ||
+      !purchasePrice ||
+      !sellingPrice ||
+      initialStock === undefined ||
+      stock === undefined
+    ) {
       return NextResponse.json(
-        {
-          error: "Duplicate product",
-          message:
-            "A product with this name already exists. Please choose a different name.",
-        },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -57,7 +64,9 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         description: description?.trim(),
-        price: parseFloat(price),
+        purchasePrice: parseFloat(purchasePrice),
+        sellingPrice: parseFloat(sellingPrice),
+        initialStock: parseInt(initialStock),
         stock: parseInt(stock),
         categoryId: categoryId || null,
         barcode: barcode?.trim(),
@@ -93,10 +102,38 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
+        saleItems: {
+          include: {
+            sale: true,
+          },
+          orderBy: {
+            sale: {
+              createdAt: "desc",
+            },
+          },
+        },
       },
     });
 
-    return NextResponse.json(products);
+    // Calculate additional fields for each product
+    const productsWithCalculations = products.map((product) => {
+      const soldQty = product.initialStock - product.stock;
+      const lastSoldDate =
+        product.saleItems.length > 0
+          ? product.saleItems[0].sale.createdAt.toISOString().split("T")[0]
+          : null;
+      const stockStatus = product.stock === 0 ? "Stock Out" : "Available";
+
+      return {
+        ...product,
+        soldQty,
+        lastSoldDate,
+        stockStatus,
+        purchaseDate: product.createdAt.toISOString().split("T")[0],
+      };
+    });
+
+    return NextResponse.json(productsWithCalculations);
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(

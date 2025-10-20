@@ -12,10 +12,33 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, price, stock, categoryId, barcode, image } =
-      await request.json();
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Only admins can update products" },
+        { status: 403 }
+      );
+    }
 
-    if (!name || !price || stock === undefined) {
+    const {
+      name,
+      description,
+      purchasePrice,
+      sellingPrice,
+      initialStock,
+      stock,
+      categoryId,
+      barcode,
+      image,
+    } = await request.json();
+
+    if (
+      !name ||
+      !purchasePrice ||
+      !sellingPrice ||
+      initialStock === undefined ||
+      stock === undefined
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -27,7 +50,9 @@ export async function PUT(
       data: {
         name,
         description,
-        price: parseFloat(price),
+        purchasePrice: parseFloat(purchasePrice),
+        sellingPrice: parseFloat(sellingPrice),
+        initialStock: parseInt(initialStock),
         stock: parseInt(stock),
         categoryId: categoryId || null,
         barcode,

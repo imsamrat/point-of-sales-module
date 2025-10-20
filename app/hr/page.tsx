@@ -160,7 +160,10 @@ export default function HRPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Human Resources
         </h1>
-        <Button onClick={handleAddEmployee}>
+        <Button
+          onClick={handleAddEmployee}
+          disabled={session?.user?.role !== "admin"}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Employee
         </Button>
@@ -209,7 +212,7 @@ export default function HRPage() {
                       {employee.position}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {employee.salary ? `$${employee.salary}` : "N/A"}
+                      {employee.salary ? `৳${employee.salary}` : "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {new Date(employee.hireDate).toLocaleDateString()}
@@ -220,6 +223,7 @@ export default function HRPage() {
                         size="sm"
                         variant="outline"
                         className="mr-2"
+                        disabled={session?.user?.role !== "admin"}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

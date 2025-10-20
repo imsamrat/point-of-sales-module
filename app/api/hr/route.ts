@@ -9,6 +9,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Only admins can create employees" },
+        { status: 403 }
+      );
+    }
+
     const { name, email, position, salary } = await request.json();
 
     if (!name || !email || !position) {

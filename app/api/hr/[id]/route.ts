@@ -1,3 +1,5 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../../../lib/auth";
 import { db } from "../../../../lib/db";
@@ -10,6 +12,14 @@ export async function PUT(
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user has admin role
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Only admins can update employees" },
+        { status: 403 }
+      );
     }
 
     const { name, email, position, salary } = await request.json();

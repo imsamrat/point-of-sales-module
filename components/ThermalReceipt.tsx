@@ -107,7 +107,7 @@ export function ThermalReceipt({ data, onClose }: ThermalReceiptProps) {
                   : item.name
               }</span>
               <span class="item-qty">${item.quantity}x</span>
-              <span class="item-price">$${item.total.toFixed(2)}</span>
+              <span class="item-price">৳${item.total.toFixed(2)}</span>
             </div>
           `
             )
@@ -116,7 +116,7 @@ export function ThermalReceipt({ data, onClose }: ThermalReceiptProps) {
           <div class="line"></div>
           <div class="total-row">
             <span>TOTAL:</span>
-            <span>$${data.total.toFixed(2)}</span>
+            <span>৳${data.total.toFixed(2)}</span>
           </div>
 
           <div class="center" style="margin-top: 8px; font-size: 8px;">
@@ -201,14 +201,14 @@ export function ThermalReceipt({ data, onClose }: ThermalReceiptProps) {
                     : item.name}
                 </span>
                 <span className="mr-2">{item.quantity}x</span>
-                <span>${item.total.toFixed(2)}</span>
+                <span>৳{item.total.toFixed(2)}</span>
               </div>
             ))}
 
             <div className="border-t border-dashed border-gray-400 mt-2 mb-2"></div>
             <div className="flex justify-between font-bold">
               <span>TOTAL:</span>
-              <span>${data.total.toFixed(2)}</span>
+              <span>৳{data.total.toFixed(2)}</span>
             </div>
 
             <div className="text-center mt-3 text-xs">

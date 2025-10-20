@@ -61,7 +61,11 @@ const navigation = [
   { name: "HR", href: "/hr", icon: UserCheck, roles: ["admin"] },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
@@ -71,14 +75,15 @@ export function Sidebar() {
   );
 
   return (
-    <div className="flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+      {/* Header - hidden on mobile since ResponsiveLayout handles it */}
+      <div className="hidden lg:flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           POS System
         </h1>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         {filteredNavigation.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -86,14 +91,15 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                "flex items-center px-3 sm:px-4 py-2 text-sm font-medium rounded-md transition-colors",
                 isActive
                   ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
               )}
+              onClick={onNavigate}
             >
-              <item.icon className="mr-3 h-5 w-5" />
-              {item.name}
+              <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+              <span className="truncate">{item.name}</span>
             </Link>
           );
         })}
@@ -108,10 +114,10 @@ export function Sidebar() {
             <button
               onClick={() => setTheme("light")}
               className={cn(
-                "p-1 rounded-md",
+                "p-1 rounded-md transition-colors",
                 theme === "light"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                  : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               )}
             >
               <Sun className="h-4 w-4" />
@@ -119,10 +125,10 @@ export function Sidebar() {
             <button
               onClick={() => setTheme("dark")}
               className={cn(
-                "p-1 rounded-md",
+                "p-1 rounded-md transition-colors",
                 theme === "dark"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                  : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               )}
             >
               <Moon className="h-4 w-4" />
@@ -130,10 +136,10 @@ export function Sidebar() {
             <button
               onClick={() => setTheme("system")}
               className={cn(
-                "p-1 rounded-md",
+                "p-1 rounded-md transition-colors",
                 theme === "system"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                  : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               )}
             >
               <Monitor className="h-4 w-4" />
@@ -142,7 +148,7 @@ export function Sidebar() {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center min-w-0 flex-1">
             <div className="flex-shrink-0">
               <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
@@ -150,8 +156,8 @@ export function Sidebar() {
                 </span>
               </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="ml-3 min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                 {session?.user?.name}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
@@ -161,7 +167,7 @@ export function Sidebar() {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 ml-2"
           >
             <LogOut className="h-4 w-4" />
           </button>

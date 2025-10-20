@@ -18,7 +18,8 @@ import { Plus, Minus, ShoppingCart, X } from "lucide-react";
 interface Product {
   id: string;
   name: string;
-  price: number;
+  purchasePrice: number;
+  sellingPrice: number;
   stock: number;
   barcode?: string;
 }
@@ -98,9 +99,9 @@ export function SaleForm() {
         {
           productId: product.id,
           name: product.name,
-          price: product.price,
+          price: product.sellingPrice,
           quantity: 1,
-          total: product.price,
+          total: product.sellingPrice,
         },
       ]);
     }
@@ -297,7 +298,7 @@ export function SaleForm() {
                     <div>
                       <p className="font-medium">{product.name}</p>
                       <p className="text-sm text-gray-500">
-                        ${product.price} • Stock: {product.stock}
+                        ৳{product.sellingPrice} • Stock: {product.stock}
                       </p>
                     </div>
                     <Button
@@ -337,7 +338,7 @@ export function SaleForm() {
                         <div className="flex-1">
                           <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-gray-500">
-                            ${item.price} each
+                            ৳{item.price} each
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -372,7 +373,7 @@ export function SaleForm() {
                         </div>
                         <div className="text-right ml-4">
                           <p className="font-medium">
-                            ${item.total.toFixed(2)}
+                            ৳{item.total.toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -381,7 +382,7 @@ export function SaleForm() {
                     <div className="border-t pt-4">
                       <div className="flex justify-between items-center text-lg font-bold">
                         <span>Total:</span>
-                        <span>${getTotal().toFixed(2)}</span>
+                        <span>৳{getTotal().toFixed(2)}</span>
                       </div>
                       <Button
                         onClick={handleCompleteSale}

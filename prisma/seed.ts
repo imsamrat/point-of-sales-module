@@ -54,7 +54,8 @@ async function main() {
     {
       name: "Laptop",
       description: "High-performance laptop",
-      price: 999.99,
+      purchasePrice: 800.0,
+      sellingPrice: 999.99,
       stock: 10,
       categoryId: electronicsCategory.id,
       barcode: "1234567890123",
@@ -62,7 +63,8 @@ async function main() {
     {
       name: "Mouse",
       description: "Wireless mouse",
-      price: 29.99,
+      purchasePrice: 20.0,
+      sellingPrice: 29.99,
       stock: 50,
       categoryId: electronicsCategory.id,
       barcode: "1234567890124",
@@ -70,7 +72,8 @@ async function main() {
     {
       name: "Keyboard",
       description: "Mechanical keyboard",
-      price: 79.99,
+      purchasePrice: 50.0,
+      sellingPrice: 79.99,
       stock: 25,
       categoryId: electronicsCategory.id,
       barcode: "1234567890125",
@@ -78,7 +81,8 @@ async function main() {
     {
       name: "Monitor",
       description: "27-inch 4K monitor",
-      price: 399.99,
+      purchasePrice: 300.0,
+      sellingPrice: 399.99,
       stock: 15,
       categoryId: electronicsCategory.id,
       barcode: "1234567890126",
@@ -86,7 +90,8 @@ async function main() {
     {
       name: "Coffee",
       description: "Premium coffee beans",
-      price: 19.99,
+      purchasePrice: 15.0,
+      sellingPrice: 19.99,
       stock: 100,
       categoryId: foodCategory.id,
       barcode: "1234567890127",
