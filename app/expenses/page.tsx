@@ -17,13 +17,21 @@ interface Expense {
   description: string;
   amount: number;
   category: string;
-  date: string;
+  date?: string | null;
   user: {
     name: string;
   };
   createdAt: string;
   updatedAt: string;
 }
+
+// Safe date formatter: returns a localized date string or 'N/A' when invalid/missing
+const formatDate = (d?: string | null) => {
+  if (!d) return "N/A";
+  const parsed = new Date(d);
+  if (Number.isNaN(parsed.getTime())) return "N/A";
+  return parsed.toLocaleDateString();
+};
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -152,7 +160,7 @@ export default function ExpensesPage() {
                       {expense.user.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {new Date(expense.date).toLocaleDateString()}
+                      {formatDate(expense.date)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       <Button

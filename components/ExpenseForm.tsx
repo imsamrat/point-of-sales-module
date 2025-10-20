@@ -17,7 +17,7 @@ interface Expense {
   description: string;
   amount: number;
   category: string;
-  date: string;
+  date?: string | null;
   createdAt: string;
   updatedAt: string;
 }

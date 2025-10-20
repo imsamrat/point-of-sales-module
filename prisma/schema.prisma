@@ -110,6 +110,7 @@ model Expense {
   amount      Float
   category    String
   description String?
+  date        DateTime @default(now())
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

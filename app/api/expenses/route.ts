@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { amount, category, description } = await request.json();
+    const { amount, category, description, date } = await request.json();
 
     if (!amount || !category) {
       return NextResponse.json(
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
         amount: parseFloat(amount),
         category,
         description,
+        date: date ? new Date(date) : new Date(),
         userId: session.user.id,
       },
     });
