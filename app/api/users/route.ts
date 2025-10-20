@@ -5,6 +5,9 @@ import { hash } from "bcryptjs";
 
 export const dynamic = "force-dynamic";
 
+// Force Node.js runtime to avoid Edge Runtime issues with bcryptjs
+export const runtime = "nodejs";
+
 export async function GET() {
   try {
     const session = await auth();

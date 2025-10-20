@@ -197,7 +197,7 @@ export default function AdminDashboard() {
             Admin Dashboard
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
-            Welcome back! Here's what's happening with your business.
+            Welcome back! Here&apos;s what&apos;s happening with your business.
           </p>
         </div>
         <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:gap-3 sm:space-y-0">

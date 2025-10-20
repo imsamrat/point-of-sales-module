@@ -4,6 +4,9 @@ import { db } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
 
+// Force Node.js runtime for database operations
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

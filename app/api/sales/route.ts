@@ -5,6 +5,9 @@ import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
+// Force Node.js runtime for database operations and transactions
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
