@@ -116,10 +116,10 @@ export default function SalesManagementPage() {
       ws["!cols"] = colWidths;
 
       // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, "All Sales");
+      XLSX.utils.book_append_sheet(wb, ws, "Sales");
 
       // Generate filename with current date
-      const fileName = `all_sales_export_${
+      const fileName = `sales_export_${
         new Date().toISOString().split("T")[0]
       }.xlsx`;
 
@@ -128,7 +128,7 @@ export default function SalesManagementPage() {
 
       toast({
         title: "Success",
-        description: "All sales data exported to Excel successfully",
+        description: "Sales data exported to Excel successfully",
         variant: "success",
       });
     } catch (error) {
@@ -235,7 +235,7 @@ export default function SalesManagementPage() {
           className="flex items-center gap-2"
         >
           <Download className="h-4 w-4" />
-          Export All Sales to Excel
+          Export to Excel
         </Button>
       </div>
 
