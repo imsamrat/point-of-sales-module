@@ -3,6 +3,8 @@ import { auth } from "../../../../lib/auth";
 import { db } from "../../../../lib/db";
 import { hash } from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
