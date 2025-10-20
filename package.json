@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev -p 3003",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -35,7 +35,8 @@
     "react-is": "^19.2.0",
     "recharts": "^2.15.4",
     "tailwind-merge": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "xlsx": "^0.18.5"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -45,6 +46,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/xlsx": "^0.0.35",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",

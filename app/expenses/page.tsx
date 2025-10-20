@@ -152,7 +152,9 @@ export default function ExpensesPage() {
                       {expense.user.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {new Date(expense.date).toLocaleDateString()}
+                      {expense.date
+                        ? new Date(expense.date).toLocaleDateString()
+                        : "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       <Button
