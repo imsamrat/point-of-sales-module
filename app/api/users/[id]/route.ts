@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../../../lib/auth";
 import { db } from "../../../../lib/db";
-import { hash } from "bcryptjs";
+import bcrypt from "bcrypt";
 
 export async function GET(
   request: NextRequest,
@@ -116,7 +116,7 @@ export async function PUT(
 
     // Hash password if provided
     if (password) {
-      updateData.password = await hash(password, 12);
+      updateData.password = await bcrypt.hash(password, 12);
     }
 
     const user = await db.user.update({
