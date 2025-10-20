@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../../lib/auth";
 import { db } from "../../../lib/db";
-import bcrypt from "bcrypt";
+import { hash } from "bcryptjs";
 
 export async function GET() {
   try {
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hash(password, 12);
 
     const user = await db.user.create({
       data: {
