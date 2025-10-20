@@ -9,11 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/Card";
-import { Trash2, Eye, DollarSign } from "lucide-react";
+import { Trash2, Eye, DollarSign, Download } from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
 import { useSession } from "next-auth/react";
 import { ThermalReceipt } from "../../components/ThermalReceipt";
+import * as XLSX from "xlsx";
 
 interface Sale {
   id: string;
@@ -73,6 +74,70 @@ export default function SalesManagementPage() {
       console.error("Error fetching sales:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const exportToExcel = () => {
+    try {
+      // Prepare data for Excel export
+      const exportData = sales.map((sale) => ({
+        "Sale ID": sale.id,
+        "Customer Name": sale.customer?.name || "Walk-in",
+        "Customer Phone": sale.customer?.phone || "",
+        Cashier: sale.user.name,
+        "Total Amount": sale.total,
+        Date: new Date(sale.createdAt).toLocaleDateString(),
+        Time: new Date(sale.createdAt).toLocaleTimeString(),
+        "Items Count": sale.items.length,
+        "Items Details": sale.items
+          .map(
+            (item) =>
+              `${item.product.name} (Qty: ${item.quantity}, Price: ৳${item.price})`
+          )
+          .join("; "),
+      }));
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+
+      // Auto-size columns
+      const colWidths = [
+        { wch: 15 }, // Sale ID
+        { wch: 20 }, // Customer Name
+        { wch: 15 }, // Customer Phone
+        { wch: 15 }, // Cashier
+        { wch: 12 }, // Total Amount
+        { wch: 12 }, // Date
+        { wch: 10 }, // Time
+        { wch: 12 }, // Items Count
+        { wch: 50 }, // Items Details
+      ];
+      ws["!cols"] = colWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Sales");
+
+      // Generate filename with current date
+      const fileName = `sales_export_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+
+      // Save file
+      XLSX.writeFile(wb, fileName);
+
+      toast({
+        title: "Success",
+        description: "Sales data exported to Excel successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      toast({
+        title: "Error",
+        description: "Failed to export sales data to Excel",
+        variant: "destructive",
+      });
     }
   };
 
@@ -164,6 +229,14 @@ export default function SalesManagementPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Sales Management</h1>
+        <Button
+          onClick={exportToExcel}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Download className="h-4 w-4" />
+          Export to Excel
+        </Button>
       </div>
 
       <Card>
