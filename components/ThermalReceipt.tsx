@@ -13,6 +13,8 @@ interface ReceiptData {
     price: number;
     total: number;
   }>;
+  subtotal?: number;
+  discount?: number;
   total: number;
   saleId?: string;
   date?: string;
@@ -114,6 +116,22 @@ export function ThermalReceipt({ data, onClose }: ThermalReceiptProps) {
             .join("")}
 
           <div class="line"></div>
+          ${
+            data.subtotal
+              ? `<div class="total-row">
+            <span>SUBTOTAL:</span>
+            <span>৳${data.subtotal.toFixed(2)}</span>
+          </div>`
+              : ""
+          }
+          ${
+            data.discount && data.discount > 0
+              ? `<div class="total-row">
+            <span>DISCOUNT:</span>
+            <span>-৳${data.discount.toFixed(2)}</span>
+          </div>`
+              : ""
+          }
           <div class="total-row">
             <span>TOTAL:</span>
             <span>৳${data.total.toFixed(2)}</span>
@@ -206,6 +224,18 @@ export function ThermalReceipt({ data, onClose }: ThermalReceiptProps) {
             ))}
 
             <div className="border-t border-dashed border-gray-400 mt-2 mb-2"></div>
+            {data.subtotal && (
+              <div className="flex justify-between mb-1">
+                <span>SUBTOTAL:</span>
+                <span>৳{data.subtotal.toFixed(2)}</span>
+              </div>
+            )}
+            {data.discount && data.discount > 0 && (
+              <div className="flex justify-between mb-1">
+                <span>DISCOUNT:</span>
+                <span>-৳{data.discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold">
               <span>TOTAL:</span>
               <span>৳{data.total.toFixed(2)}</span>

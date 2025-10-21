@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    const { items, total, customer } = await request.json();
+    const { items, total, customer, discount = 0 } = await request.json();
     console.log("Received sale data:", {
       items,
       total,
@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
           const sale = await tx.sale.create({
             data: {
               total,
+              discount,
               userId: session.user.id,
               customerId,
             },

@@ -19,6 +19,7 @@ import * as XLSX from "xlsx";
 interface Sale {
   id: string;
   total: number;
+  discount: number;
   createdAt: string;
   user: {
     id: string;
@@ -85,6 +86,8 @@ export default function SalesManagementPage() {
         "Customer Name": sale.customer?.name || "Walk-in",
         "Customer Phone": sale.customer?.phone || "",
         Cashier: sale.user.name,
+        Subtotal: sale.total + (sale.discount || 0),
+        Discount: sale.discount || 0,
         "Total Amount": sale.total,
         Date: new Date(sale.createdAt).toLocaleDateString(),
         Time: new Date(sale.createdAt).toLocaleTimeString(),
@@ -107,6 +110,8 @@ export default function SalesManagementPage() {
         { wch: 20 }, // Customer Name
         { wch: 15 }, // Customer Phone
         { wch: 15 }, // Cashier
+        { wch: 12 }, // Subtotal
+        { wch: 10 }, // Discount
         { wch: 12 }, // Total Amount
         { wch: 12 }, // Date
         { wch: 10 }, // Time
@@ -261,6 +266,9 @@ export default function SalesManagementPage() {
                     Cashier
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Discount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Total
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -291,6 +299,9 @@ export default function SalesManagementPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {sale.user.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      ৳{sale.discount?.toFixed(2) || "0.00"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       ৳{sale.total.toFixed(2)}
@@ -411,9 +422,26 @@ export default function SalesManagementPage() {
                 </div>
 
                 <div className="border-t pt-4">
-                  <div className="flex justify-between items-center text-lg font-bold">
-                    <span>Total:</span>
-                    <span>৳{selectedSale.total.toFixed(2)}</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span>Subtotal:</span>
+                      <span>
+                        ৳
+                        {(
+                          selectedSale.total + (selectedSale.discount || 0)
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                    {selectedSale.discount && selectedSale.discount > 0 && (
+                      <div className="flex justify-between items-center text-red-600">
+                        <span>Discount:</span>
+                        <span>-৳{selectedSale.discount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+                      <span>Total:</span>
+                      <span>৳{selectedSale.total.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -447,6 +475,8 @@ export default function SalesManagementPage() {
               price: item.price,
               total: item.price * item.quantity,
             })),
+            subtotal: selectedSale.total + (selectedSale.discount || 0),
+            discount: selectedSale.discount || 0,
             total: selectedSale.total,
             saleId: selectedSale.id,
             date: new Date(selectedSale.createdAt).toLocaleString(),

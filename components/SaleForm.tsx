@@ -50,6 +50,7 @@ export function SaleForm() {
     phone: "",
     address: "",
   });
+  const [discount, setDiscount] = useState<number>(0);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
   const { toast } = useToast();
@@ -140,6 +141,11 @@ export function SaleForm() {
     return cart.reduce((total, item) => total + item.total, 0);
   };
 
+  const getFinalTotal = () => {
+    const subtotal = getTotal();
+    return Math.max(0, subtotal - discount);
+  };
+
   const handleCompleteSale = () => {
     if (cart.length === 0) {
       toast({
@@ -172,7 +178,8 @@ export function SaleForm() {
           quantity: item.quantity,
           price: item.price,
         })),
-        total: getTotal(),
+        total: getFinalTotal(),
+        discount: discount,
       };
 
       // Include customer data if phone is provided
@@ -209,7 +216,9 @@ export function SaleForm() {
             price: item.price,
             total: item.total,
           })),
-          total: getTotal(),
+          subtotal: getTotal(),
+          discount: discount,
+          total: getFinalTotal(),
           saleId: saleResult.sale?.id,
           date: new Date().toLocaleString(),
           cashier: session?.user?.name || "Unknown",
@@ -379,11 +388,35 @@ export function SaleForm() {
                       </div>
                     ))}
 
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between items-center text-lg font-bold">
-                        <span>Total:</span>
+                    <div className="border-t pt-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span>Subtotal:</span>
                         <span>৳{getTotal().toFixed(2)}</span>
                       </div>
+
+                      <div className="flex items-center space-x-2">
+                        <label className="text-sm font-medium">Discount:</label>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          value={discount}
+                          onChange={(e) =>
+                            setDiscount(
+                              Math.max(0, parseFloat(e.target.value) || 0)
+                            )
+                          }
+                          className="w-24 text-right"
+                          min="0"
+                          step="0.01"
+                        />
+                        <span className="text-sm text-gray-500">৳</span>
+                      </div>
+
+                      <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+                        <span>Total:</span>
+                        <span>৳{getFinalTotal().toFixed(2)}</span>
+                      </div>
+
                       <Button
                         onClick={handleCompleteSale}
                         className="w-full mt-4"

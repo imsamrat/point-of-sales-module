@@ -64,6 +64,7 @@ model Product {
 model Sale {
   id        String     @id @default(cuid())
   total     Float
+  discount  Float      @default(0)
   userId    String
   customerId String?
   createdAt DateTime   @default(now())
