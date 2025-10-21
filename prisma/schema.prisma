@@ -74,6 +74,7 @@ model Sale {
   user      User       @relation(fields: [userId], references: [id])
   customer  Customer?  @relation(fields: [customerId], references: [id])
   items     SaleItem[]
+  due       Due?
 
   @@map("sales")
 }
@@ -102,6 +103,7 @@ model Customer {
 
   // Relations
   sales     Sale[]
+  dues      Due[]
 
   @@map("customers")
 }
@@ -133,4 +135,92 @@ model Employee {
   updatedAt DateTime @updatedAt
 
   @@map("employees")
+}
+
+model Supplier {
+  id        String     @id @default(cuid())
+  name      String
+  email     String?    @unique
+  phone     String?
+  address   String?
+  contactPerson String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  purchases Purchase[]
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id            String           @id @default(cuid())
+  supplierId    String
+  purchaseDate  DateTime         @default(now())
+  totalAmount   Float
+  paidAmount    Float            @default(0)
+  pendingAmount Float            @default(0)
+  status        String           @default("pending") // pending, partial, paid
+  invoiceNumber String?
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  supplier      Supplier         @relation(fields: [supplierId], references: [id])
+  payments      PurchasePayment[]
+
+  @@map("purchases")
+}
+
+model PurchasePayment {
+  id            String   @id @default(cuid())
+  purchaseId    String
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("cash") // cash, bank_transfer, check, card
+  reference     String?  // check number, transaction id, etc.
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  purchase      Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@map("purchase_payments")
+}
+
+model Due {
+  id            String      @id @default(cuid())
+  saleId        String      @unique
+  customerId    String?
+  totalAmount   Float
+  paidAmount    Float       @default(0)
+  pendingAmount Float       @default(0)
+  status        String      @default("pending") // pending, partial, paid
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  sale          Sale        @relation(fields: [saleId], references: [id])
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  payments      DuePayment[]
+
+  @@map("dues")
+}
+
+model DuePayment {
+  id            String   @id @default(cuid())
+  dueId         String
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("cash") // cash, bank_transfer, check, card
+  reference     String?  // check number, transaction id, etc.
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  due           Due      @relation(fields: [dueId], references: [id], onDelete: Cascade)
+
+  @@map("due_payments")
 }

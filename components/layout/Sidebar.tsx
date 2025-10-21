@@ -17,6 +17,8 @@ import {
   Tag,
   FileText,
   UserCheck,
+  Truck,
+  Receipt,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -50,6 +52,24 @@ const navigation = [
     href: "/categories",
     icon: Tag,
     roles: ["admin", "user"],
+  },
+  {
+    name: "Suppliers",
+    href: "/suppliers",
+    icon: Truck,
+    roles: ["admin"],
+  },
+  {
+    name: "Purchases",
+    href: "/purchases",
+    icon: Receipt,
+    roles: ["admin"],
+  },
+  {
+    name: "Dues",
+    href: "/dues",
+    icon: DollarSign,
+    roles: ["admin"],
   },
   {
     name: "User Management",

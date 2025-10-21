@@ -83,11 +83,17 @@ export default function AdminDashboard() {
   const [inventoryCount, setInventoryCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [duesSummary, setDuesSummary] = useState({
+    totalDues: 0,
+    totalPending: 0,
+    totalPaid: 0,
+  });
   const router = useRouter();
 
   useEffect(() => {
     fetchDashboardData();
     fetchInventoryCount();
+    fetchDuesSummary();
   }, [selectedYear]);
 
   const fetchDashboardData = async () => {
@@ -114,6 +120,31 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error("Error fetching inventory count:", error);
+    }
+  };
+
+  const fetchDuesSummary = async () => {
+    try {
+      const response = await fetch("/api/dues");
+      if (response.ok) {
+        const dues = await response.json();
+        const totalDues = dues.length;
+        const totalPending = dues.reduce(
+          (sum: number, due: any) => sum + due.pendingAmount,
+          0
+        );
+        const totalPaid = dues.reduce(
+          (sum: number, due: any) => sum + due.paidAmount,
+          0
+        );
+        setDuesSummary({
+          totalDues,
+          totalPending,
+          totalPaid,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching dues summary:", error);
     }
   };
 
@@ -231,7 +262,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
             <CardTitle className="text-sm font-medium text-green-800 dark:text-green-200 truncate">
@@ -322,6 +353,29 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
           <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-purple-400/10 rounded-full -mr-8 -mt-8"></div>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-200 truncate">
+              Pending Dues
+            </CardTitle>
+            <div className="p-2 bg-orange-500 rounded-full flex-shrink-0">
+              <DollarSign className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-orange-900 dark:text-orange-100">
+              {formatCurrency(duesSummary.totalPending)}
+            </div>
+            <div className="flex items-center text-xs text-orange-700 dark:text-orange-300 mt-1">
+              <Activity className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">
+                {duesSummary.totalDues} outstanding dues
+              </span>
+            </div>
+          </CardContent>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-orange-400/10 rounded-full -mr-8 -mt-8"></div>
         </Card>
       </div>
 
