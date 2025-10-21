@@ -19,6 +19,7 @@ import {
   User,
   Activity,
   Mail,
+  Key,
 } from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
@@ -54,6 +55,20 @@ export default function UsersPage() {
     userId: null,
     userName: "",
     isDeleting: false,
+  });
+
+  const [resetPasswordDialog, setResetPasswordDialog] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    userName: string;
+    customPassword: string;
+    isResetting: boolean;
+  }>({
+    isOpen: false,
+    userId: null,
+    userName: "",
+    customPassword: "",
+    isResetting: false,
   });
 
   useEffect(() => {
@@ -154,6 +169,84 @@ export default function UsersPage() {
       userId: null,
       userName: "",
       isDeleting: false,
+    });
+  };
+
+  const handleResetPassword = (userId: string, userName: string) => {
+    setResetPasswordDialog({
+      isOpen: true,
+      userId,
+      userName,
+      customPassword: "",
+      isResetting: false,
+    });
+  };
+
+  const handleConfirmResetPassword = async () => {
+    if (!resetPasswordDialog.userId || !resetPasswordDialog.customPassword)
+      return;
+
+    if (resetPasswordDialog.customPassword.length < 6) {
+      toast({
+        title: "Invalid Password",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetPasswordDialog((prev) => ({ ...prev, isResetting: true }));
+
+    try {
+      const response = await fetch(
+        `/api/users/${resetPasswordDialog.userId}/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            password: resetPasswordDialog.customPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Password Reset Successful",
+          description: `Password for ${resetPasswordDialog.userName} has been reset successfully`,
+          variant: "success",
+        });
+        handleCloseResetPasswordDialog();
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || data.error || "Failed to reset password",
+          variant: "destructive",
+        });
+        setResetPasswordDialog((prev) => ({ ...prev, isResetting: false }));
+      }
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      toast({
+        title: "Error",
+        description:
+          "An unexpected error occurred while resetting the password",
+        variant: "destructive",
+      });
+      setResetPasswordDialog((prev) => ({ ...prev, isResetting: false }));
+    }
+  };
+
+  const handleCloseResetPasswordDialog = () => {
+    setResetPasswordDialog({
+      isOpen: false,
+      userId: null,
+      userName: "",
+      customPassword: "",
+      isResetting: false,
     });
   };
 
@@ -339,21 +432,35 @@ export default function UsersPage() {
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                        <Button
-                          onClick={() => handleEditUser(user)}
-                          size="sm"
-                          variant="outline"
-                          className="mr-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteUser(user.id, user.name)}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => handleEditUser(user)}
+                            size="sm"
+                            variant="outline"
+                            title="Edit User"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleResetPassword(user.id, user.name)
+                            }
+                            size="sm"
+                            variant="outline"
+                            title="Reset Password"
+                            className="text-orange-600 hover:text-orange-700 border-orange-300 hover:border-orange-400"
+                          >
+                            <Key className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            size="sm"
+                            variant="destructive"
+                            title="Delete User"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -379,6 +486,91 @@ export default function UsersPage() {
           description={`Are you sure you want to delete "${deleteDialog.userName}"? This action cannot be undone and will permanently remove their account.`}
           isLoading={deleteDialog.isDeleting}
         />
+
+        {/* Reset Password Dialog */}
+        {resetPasswordDialog.isOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Reset Password</h3>
+                  <button
+                    onClick={handleCloseResetPasswordDialog}
+                    className="text-gray-400 hover:text-gray-600 text-xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <Key className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold mb-2">
+                      Reset Password for {resetPasswordDialog.userName}
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Enter a new password for this user. The current password
+                      will be permanently lost.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="newPassword"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      New Password
+                    </label>
+                    <input
+                      id="newPassword"
+                      type="password"
+                      value={resetPasswordDialog.customPassword}
+                      onChange={(e) =>
+                        setResetPasswordDialog((prev) => ({
+                          ...prev,
+                          customPassword: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                      placeholder="Enter new password (min. 6 characters)"
+                      minLength={6}
+                      required
+                    />
+                    {resetPasswordDialog.customPassword &&
+                      resetPasswordDialog.customPassword.length < 6 && (
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                          Password must be at least 6 characters long
+                        </p>
+                      )}
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleCloseResetPasswordDialog}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleConfirmResetPassword}
+                      className="flex-1 bg-orange-600 hover:bg-orange-700"
+                      disabled={
+                        resetPasswordDialog.isResetting ||
+                        !resetPasswordDialog.customPassword ||
+                        resetPasswordDialog.customPassword.length < 6
+                      }
+                    >
+                      {resetPasswordDialog.isResetting
+                        ? "Resetting..."
+                        : "Reset Password"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ResponsiveLayout>
   );
