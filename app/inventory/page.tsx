@@ -18,7 +18,18 @@ import {
   SelectValue,
 } from "../../components/ui/Select";
 import { ProductForm } from "../../components/ProductForm";
-import { Edit, Trash2, Plus, Package, Filter, X, Search } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Plus,
+  Package,
+  Filter,
+  X,
+  Search,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
+} from "lucide-react";
 import { useToast } from "../../components/ui/use-toast";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
 import { useRouter } from "next/navigation";
@@ -199,6 +210,23 @@ export default function InventoryPage() {
     return null;
   };
 
+  const totalProducts = products.length;
+  const totalStockValue = products.reduce(
+    (sum, product) => sum + product.purchasePrice * product.stock,
+    0
+  );
+  const lowStockCount = products.filter((product) => product.stock < 10).length;
+  const totalUnsoldValue = products
+    .filter((product) => product.soldQty === 0)
+    .reduce((sum, product) => sum + product.purchasePrice * product.stock, 0);
+
+  const formatCurrency = (amount: number) => {
+    return `৳${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
+
   const lowStockProducts = products.filter((product) => product.stock < 10);
 
   // Get unique categories for filter
@@ -315,6 +343,95 @@ export default function InventoryPage() {
             Add Product
           </Button>
         </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-200 truncate">
+              Total Products
+            </CardTitle>
+            <div className="p-2 bg-blue-500 rounded-full flex-shrink-0">
+              <Package className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-blue-900 dark:text-blue-100">
+              {totalProducts}
+            </div>
+            <div className="flex items-center text-xs text-blue-700 dark:text-blue-300 mt-1">
+              <Package className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">Items in inventory</span>
+            </div>
+          </CardContent>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-blue-400/10 rounded-full -mr-8 -mt-8"></div>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium text-green-800 dark:text-green-200 truncate">
+              Total Stock Value
+            </CardTitle>
+            <div className="p-2 bg-green-500 rounded-full flex-shrink-0">
+              <DollarSign className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-900 dark:text-green-100">
+              {formatCurrency(totalStockValue)}
+            </div>
+            <div className="flex items-center text-xs text-green-700 dark:text-green-300 mt-1">
+              <TrendingUp className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">Current inventory value</span>
+            </div>
+          </CardContent>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-green-400/10 rounded-full -mr-8 -mt-8"></div>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-200 truncate">
+              Low Stock Items
+            </CardTitle>
+            <div className="p-2 bg-orange-500 rounded-full flex-shrink-0">
+              <AlertCircle className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-orange-900 dark:text-orange-100">
+              {lowStockCount}
+            </div>
+            <div className="flex items-center text-xs text-orange-700 dark:text-orange-300 mt-1">
+              <AlertCircle className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">
+                {lowStockCount > 0 ? "Requires attention" : "All stocked"}
+              </span>
+            </div>
+          </CardContent>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-orange-400/10 rounded-full -mr-8 -mt-8"></div>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-200 truncate">
+              Total Unsold Value
+            </CardTitle>
+            <div className="p-2 bg-purple-500 rounded-full flex-shrink-0">
+              <TrendingUp className="h-4 w-4 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100">
+              {formatCurrency(totalUnsoldValue)}
+            </div>
+            <div className="flex items-center text-xs text-purple-700 dark:text-purple-300 mt-1">
+              <Package className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">Never sold items value</span>
+            </div>
+          </CardContent>
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-purple-400/10 rounded-full -mr-8 -mt-8"></div>
+        </Card>
       </div>
 
       {filteredLowStockProducts.length > 0 && (
